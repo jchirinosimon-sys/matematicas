@@ -474,10 +474,7 @@ let tutorialStep = 0;
 const TUTORIAL_STEPS = 4;
 
 function initTutorial() {
-  if (!localStorage.getItem('statCalcTutorial')) {
-    setTimeout(showTutorial, 600);
-    localStorage.setItem('statCalcTutorial', '1');
-  }
+  setTimeout(showTutorial, 600);
 }
 
 function showTutorial() {
