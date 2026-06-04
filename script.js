@@ -24,8 +24,6 @@ const btnPDF       = $('btnPDF');
 const btnTutorial  = $('btnTutorial');
 const themeToggle  = $('themeToggle');
 
-let chartHistogram = null, chartCumulative = null;
-
 const EXAMPLE_DATA = [
   { li: 2, ls: 4, fi: 6  }, { li: 5, ls: 7, fi: 9  },
   { li: 8, ls: 10, fi: 15 }, { li: 11, ls: 13, fi: 12 },
@@ -150,7 +148,6 @@ function deleteLastRow() {
 
 function clearTable() {
   tableBody.innerHTML = '';
-  destroyCharts();
   renderEmptyState();
   saveToStorage();
 }
@@ -209,7 +206,6 @@ function computeAll() {
 
   if (!rawRows.length) {
     renderEmptyState();
-    destroyCharts();
     return;
   }
 
@@ -283,7 +279,6 @@ function computeAll() {
   renderPasoAPaso(result);
   highlightTableRows(result);
   renderInterpretation(result);
-  updateCharts(result);
   showVerifiedBadge();
   saveToStorage();
 }
@@ -309,7 +304,6 @@ function renderErrors(errors) {
   errorContainer.innerHTML = errors.map(e =>
     `<div class="error-msg"><i class="fas fa-exclamation-triangle"></i>${e}</div>`
   ).join('');
-  destroyCharts();
   [resultN, resultMedia, resultMediana, resultModa, resultRango].forEach(el => el.textContent = '—');
   pasoContent.innerHTML = '<p class="empty-state">Corrige los errores para ver el desarrollo paso a paso.</p>';
   interpContent.innerHTML = '<p class="empty-state">Corrige los errores para ver la interpretación.</p>';
@@ -459,86 +453,6 @@ function showVerifiedBadge() {
   badgeTimeout = setTimeout(() => { verifiedBadge.style.display = 'none'; }, 2500);
 }
 
-/* ===== Charts ===== */
-function getChartColors() {
-  const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
-  return {
-    grid: 'rgba(37,99,235,0.08)', text: isDark ? '#E2E8F0' : '#1e293b',
-    bar: 'rgba(37,99,235,0.6)', barBorder: 'rgba(37,99,235,0.9)',
-    line2: 'rgba(16,185,129,1)', line2Fill: 'rgba(16,185,129,0.12)',
-  };
-}
-
-function destroyCharts() {
-  if (chartHistogram) { chartHistogram.destroy(); chartHistogram = null; }
-  if (chartCumulative) { chartCumulative.destroy(); chartCumulative = null; }
-}
-
-function updateCharts(r) {
-  if (!r.rows.length) { destroyCharts(); return; }
-  const labels = r.rows.map(r => `${r.li}–${r.ls}`);
-  const fi = r.rows.map(r => r.fi);
-  const fa = r.rows.map(r => r.fa);
-  const cols = getChartColors();
-
-  const baseTooltip = {
-    backgroundColor: 'rgba(15,23,42,0.9)', titleFont: { family: 'Inter' },
-    bodyFont: { family: 'JetBrains Mono' }, cornerRadius: 8, padding: 10,
-  };
-
-  const histEl = $('chartHistogram');
-  if (chartHistogram) chartHistogram.destroy();
-  if (histEl) {
-    chartHistogram = new Chart(histEl, {
-      type: 'bar',
-      data: {
-        labels,
-        datasets: [{ label: 'Frecuencia (fi)', data: fi, backgroundColor: cols.bar, borderColor: cols.barBorder, borderWidth: 1, borderRadius: 3 }],
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        animation: { duration: 300, easing: 'easeInOutQuart' },
-        plugins: { legend: { labels: { color: cols.text, font: { family: 'Inter', size: 11 } } }, tooltip: baseTooltip },
-        scales: {
-          x: { ticks: { color: cols.text, font: { family: 'Inter', size: 10 } }, grid: { color: cols.grid } },
-          y: { ticks: { color: cols.text, font: { family: 'Inter', size: 10 } }, grid: { color: cols.grid }, beginAtZero: true },
-        },
-      },
-    });
-  }
-
-  const cumEl = $('chartCumulative');
-  if (chartCumulative) chartCumulative.destroy();
-  if (cumEl) {
-    chartCumulative = new Chart(cumEl, {
-      type: 'line',
-      data: {
-        labels,
-        datasets: [{ label: 'Frec. Acumulada (Fa)', data: fa, borderColor: cols.line2, backgroundColor: cols.line2Fill, fill: true, tension: 0.3, pointBackgroundColor: cols.line2, pointRadius: 4 }],
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        animation: { duration: 300, easing: 'easeInOutQuart' },
-        plugins: { legend: { labels: { color: cols.text, font: { family: 'Inter', size: 11 } } }, tooltip: baseTooltip },
-        scales: {
-          x: { ticks: { color: cols.text, font: { family: 'Inter', size: 10 } }, grid: { color: cols.grid } },
-          y: { ticks: { color: cols.text, font: { family: 'Inter', size: 10 } }, grid: { color: cols.grid }, beginAtZero: true },
-        },
-      },
-    });
-  }
-}
-
-function updateChartsTheme() {
-  const rows = getRows();
-  if (!rows.length) return;
-  rows.forEach(r => { r.mc = (r.li + r.ls) / 2; });
-  let acc = 0;
-  rows.forEach(r => { acc += r.fi; r.fa = acc; });
-  rows.forEach(r => { r.fixmc = r.fi * r.mc; });
-  updateCharts({ rows, N: rows.reduce((s, r) => s + r.fi, 0) });
-}
-
 /* ===== LocalStorage ===== */
 function saveToStorage() {
   localStorage.setItem('statCalcData', JSON.stringify(getRows()));
@@ -607,7 +521,6 @@ function toggleTheme() {
   html.setAttribute('data-theme', next);
   localStorage.setItem('theme', next);
   $('themeToggle').querySelector('i').className = next === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
-  updateChartsTheme();
 }
 
 function applyTheme() {

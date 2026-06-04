@@ -119,7 +119,7 @@ body {
 .header, .team-section, .actions, .error-container,
 .table-section, .info-card-section, .results-section,
 .paso-section, .interpretation-section,
-.charts-section, .footer {
+.footer {
   position: relative; z-index: 2;
   max-width: 1200px; margin: 0 auto;
   padding-left: 24px; padding-right: 24px;
@@ -454,23 +454,6 @@ td.readonly {
   margin: 4px 0 8px; display: block;
 }
 
-/* ===== Charts ===== */
-.charts-section { margin: 0 auto 28px; }
-.charts-grid {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
-}
-.chart-card {
-  background: var(--surface); backdrop-filter: blur(var(--blur));
-  border: 1px solid var(--border); border-radius: var(--radius-lg);
-  padding: 18px; box-shadow: var(--shadow-md);
-  transition: border-color var(--transition);
-}
-.chart-card:hover { border-color: var(--border-hover); }
-.chart-card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
-.chart-card-header i { font-size: 1rem; color: var(--electric-blue); }
-.chart-card-header h3 { font-size: 0.88rem; font-weight: 600; color: var(--text); }
-.chart-container { position: relative; width: 100%; height: 220px; }
-
 /* ===== Tutorial Overlay ===== */
 .tutorial-overlay {
   position: fixed; inset: 0; z-index: 1000;
@@ -524,7 +507,7 @@ td.readonly {
   .header, .team-section, .actions, .error-container,
   .table-section, .info-card-section, .results-section,
   .paso-section, .interpretation-section,
-  .charts-section, .footer { padding-left: 14px; padding-right: 14px; }
+  .footer { padding-left: 14px; padding-right: 14px; }
   .header { padding-top: 40px; }
   .title-line { font-size: 1.6rem; }
   .title-sub { font-size: 0.9rem; }
@@ -544,8 +527,6 @@ td.readonly {
   .results-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
   .result-value { font-size: 1.4rem; }
   .result-card { padding: 16px 10px; }
-  .charts-grid { grid-template-columns: 1fr; }
-  .chart-container { height: 200px; }
   .interp-grid { grid-template-columns: 1fr; }
   .paso-line { font-size: 0.8rem; overflow-x: auto; }
   .verified-badge { top: 72px; right: 14px; font-size: 0.7rem; padding: 6px 12px; }
