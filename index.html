@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Calculadora Estadística — Datos Agrupados</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<canvas id="mathCanvas" aria-hidden="true"></canvas>
+<div class="grid-overlay" aria-hidden="true"></div>
+
+<!-- ===== Badge de verificación ===== -->
+<div id="verifiedBadge" class="verified-badge" style="display:none">
+  <i class="fas fa-check-circle"></i>
+  <span>Cálculos actualizados correctamente</span>
+</div>
+
+<!-- ===== Toggle tema ===== -->
+<button id="themeToggle" class="theme-toggle" aria-label="Cambiar tema">
+  <i class="fas fa-moon"></i>
+</button>
+
+<!-- ===== Tutorial overlay ===== -->
+<div id="tutorialOverlay" class="tutorial-overlay" style="display:none">
+  <div class="tutorial-modal">
+    <div class="tutorial-header">
+      <i class="fas fa-graduation-cap"></i>
+      <h2>Bienvenido a la Calculadora Estadística</h2>
+    </div>
+    <div class="tutorial-body">
+      <div class="tutorial-step active" data-step="0">
+        <div class="tutorial-icon"><i class="fas fa-table"></i></div>
+        <h3>1. Ingresa tus datos</h3>
+        <p>Escribe los valores de <strong>Li</strong> (límite inferior), <strong>Ls</strong> (límite superior) y <strong>f<sub>i</sub></strong> (frecuencia) en la tabla. Puedes agregar o eliminar filas con los botones.</p>
+      </div>
+      <div class="tutorial-step" data-step="1">
+        <div class="tutorial-icon"><i class="fas fa-magic"></i></div>
+        <h3>2. Cálculos automáticos</h3>
+        <p>Los valores de <strong>F<sub>a</sub></strong> y <strong>Mc</strong> se calculan automáticamente mientras escribes.</p>
+      </div>
+      <div class="tutorial-step" data-step="2">
+        <div class="tutorial-icon"><i class="fas fa-chart-line"></i></div>
+        <h3>3. Resultados instantáneos</h3>
+        <p>La <strong>Media</strong>, <strong>Mediana</strong>, <strong>Moda</strong> y <strong>Rango</strong> se actualizan en tiempo real junto con el desarrollo paso a paso.</p>
+      </div>
+      <div class="tutorial-step" data-step="3">
+        <div class="tutorial-icon"><i class="fas fa-database"></i></div>
+        <h3>4. Datos de ejemplo</h3>
+        <p>Usa el botón <strong>"Cargar Ejemplo"</strong> para cargar datos predefinidos y explorar cómo funciona la calculadora.</p>
+      </div>
+    </div>
+    <div class="tutorial-footer">
+      <div class="tutorial-dots" id="tutorialDots"></div>
+      <div class="tutorial-buttons">
+        <button id="tutorialPrev" class="btn btn-secondary" style="display:none"><i class="fas fa-arrow-left"></i> Anterior</button>
+        <button id="tutorialNext" class="btn btn-primary">Siguiente <i class="fas fa-arrow-right"></i></button>
+        <button id="tutorialSkip" class="btn btn-warning">Saltar <i class="fas fa-times"></i></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Encabezado ===== -->
+<header class="header">
+  <div class="header-glow"></div>
+  <div class="header-badge">
+    <span class="badge-line"></span>
+    <span class="badge-text">ESTADÍSTICA · 2026</span>
+    <span class="badge-line"></span>
+  </div>
+  <div class="header-icon">
+    <span class="icon-ring"><i class="fas fa-chart-bar"></i></span>
+  </div>
+  <h1 class="header-title">
+    <span class="title-line">Calculadora Estadística</span>
+    <span class="title-sub">para Datos Agrupados</span>
+  </h1>
+  <p class="header-subtitle">Media · Moda · Mediana · Rango</p>
+</header>
+
+<!-- ===== Integrantes ===== -->
+<section class="team-section">
+  <div class="team-card">
+    <div class="team-header">
+      <i class="fas fa-user-graduate"></i>
+      <span>Integrantes del Proyecto</span>
+    </div>
+    <ul class="team-list">
+      <li><span class="team-num">01</span> José Martín Chirino Simón</li>
+      <li><span class="team-num">02</span> Joshua Emanuel Osorio Franco</li>
+      <li><span class="team-num">03</span> Natanael Molina Fuentes</li>
+      <li><span class="team-num">04</span> Marco Antonio Ramírez Hidalgo</li>
+    </ul>
+    <div class="team-footer">
+      <i class="fas fa-book-open"></i>
+      Proyecto Final de Matemáticas
+    </div>
+  </div>
+</section>
+
+<!-- ===== Acciones ===== -->
+<section class="actions">
+  <button id="btnExample" class="btn btn-primary"><i class="fas fa-database"></i> <span>Cargar Ejemplo</span></button>
+  <button id="btnAddRow" class="btn btn-secondary"><i class="fas fa-plus-circle"></i> <span>Agregar Fila</span></button>
+  <button id="btnDeleteRow" class="btn btn-danger"><i class="fas fa-minus-circle"></i> <span>Eliminar Fila</span></button>
+  <button id="btnClear" class="btn btn-warning"><i class="fas fa-eraser"></i> <span>Limpiar Todo</span></button>
+  <button id="btnPDF" class="btn btn-info"><i class="fas fa-file-pdf"></i> <span>Exportar PDF</span></button>
+  <button id="btnTutorial" class="btn btn-secondary"><i class="fas fa-question-circle"></i> <span>Ayuda</span></button>
+</section>
+
+<!-- ===== Mensajes de error ===== -->
+<div id="errorContainer" class="error-container" style="display:none"></div>
+
+<!-- ===== Tabla ===== -->
+<section class="table-section">
+  <div class="section-header">
+    <i class="fas fa-table"></i>
+    <h2>Tabla de Frecuencias</h2>
+    <div class="section-line"></div>
+  </div>
+  <div class="table-wrapper">
+    <table id="dataTable">
+      <thead>
+        <tr>
+          <th><span>Li</span></th>
+          <th><span>Ls</span></th>
+          <th><span>f<sub>i</sub></span></th>
+          <th><span>F<sub>a</sub></span></th>
+          <th><span>Mc</span></th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ===== Tarjeta informativa: Marca de Clase ===== -->
+<section class="info-card-section">
+  <div class="info-card">
+    <div class="info-card-icon"><i class="fas fa-cube"></i></div>
+    <div class="info-card-body">
+      <h3>¿Qué es la Marca de Clase?</h3>
+      <div class="info-card-formula">Mc = (Li + Ls) ÷ 2</div>
+      <p>La marca de clase representa el punto medio de cada intervalo y se utiliza para calcular la media de datos agrupados.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Panel de Resultados ===== -->
+<section class="results-section">
+  <div class="section-header">
+    <i class="fas fa-chart-line"></i>
+    <h2>Panel de Resultados</h2>
+    <div class="section-line"></div>
+  </div>
+  <div class="results-grid">
+    <div class="result-card" id="card-n">
+      <div class="card-top">
+        <div class="result-icon"><i class="fas fa-database"></i></div>
+        <div class="result-label">Total de Datos</div>
+      </div>
+      <div class="result-value" id="resultN">—</div>
+      <div class="result-symbol">N</div>
+    </div>
+    <div class="result-card" id="card-media">
+      <div class="card-top">
+        <div class="result-icon"><i class="fas fa-chart-line"></i></div>
+        <div class="result-label">Media Aritmética</div>
+      </div>
+      <div class="result-value" id="resultMedia">—</div>
+      <div class="result-symbol">x̄</div>
+    </div>
+    <div class="result-card" id="card-mediana">
+      <div class="card-top">
+        <div class="result-icon"><i class="fas fa-medal"></i></div>
+        <div class="result-label">Mediana</div>
+      </div>
+      <div class="result-value" id="resultMediana">—</div>
+      <div class="result-symbol">Md</div>
+    </div>
+    <div class="result-card" id="card-moda">
+      <div class="card-top">
+        <div class="result-icon"><i class="fas fa-bullseye"></i></div>
+        <div class="result-label">Moda</div>
+      </div>
+      <div class="result-value" id="resultModa">—</div>
+      <div class="result-symbol">Mo</div>
+    </div>
+    <div class="result-card" id="card-rango">
+      <div class="card-top">
+        <div class="result-icon"><i class="fas fa-ruler-combined"></i></div>
+        <div class="result-label">Rango</div>
+      </div>
+      <div class="result-value" id="resultRango">—</div>
+      <div class="result-symbol">R</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Desarrollo Paso a Paso ===== -->
+<section class="paso-section">
+  <div class="section-header">
+    <i class="fas fa-list-ol"></i>
+    <h2>Desarrollo Paso a Paso</h2>
+    <div class="section-line"></div>
+  </div>
+  <div id="pasoContent" class="paso-content">
+    <p class="empty-state">Ingresa datos en la tabla para ver el desarrollo paso a paso.</p>
+  </div>
+</section>
+
+<!-- ===== Interpretación de Resultados ===== -->
+<section class="interpretation-section">
+  <div class="section-header">
+    <i class="fas fa-book-open"></i>
+    <h2>Interpretación de Resultados</h2>
+    <div class="section-line"></div>
+  </div>
+  <div id="interpretationContent" class="interpretation-content">
+    <p class="empty-state">Ingresa datos en la tabla para ver la interpretación de los resultados.</p>
+  </div>
+</section>
+
+<!-- ===== Gráficas ===== -->
+<section class="charts-section">
+  <div class="section-header">
+    <i class="fas fa-chart-bar"></i>
+    <h2>Gráficas Estadísticas</h2>
+    <div class="section-line"></div>
+  </div>
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-card-header"><i class="fas fa-chart-bar"></i><h3>Histograma de Frecuencias</h3></div>
+      <div class="chart-container"><canvas id="chartHistogram"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-header"><i class="fas fa-arrow-up"></i><h3>Frecuencia Acumulada</h3></div>
+      <div class="chart-container"><canvas id="chartCumulative"></canvas></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Footer ===== -->
+<footer class="footer">
+  <div class="footer-content">
+    <div class="footer-math">∑ f<sub>i</sub> · Mc<sub>i</sub> = x̄ · N</div>
+    <p>&copy; 2026 — Proyecto Final de Matemáticas</p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="script.js"></script>
+
+</body>
+</html>
